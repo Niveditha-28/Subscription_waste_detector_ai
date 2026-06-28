@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from utils.risk_engine import calculate_risk
+from utils.insights import generate_insight
 
 st.set_page_config(
     page_title="Subscription Waste Detector AI",
@@ -33,6 +35,24 @@ if uploaded_file:
     recurring = recurring[recurring["Occurrences"] >= 2]
     recurring["Yearly_Cost"] = recurring["Monthly_Cost"] * 12
     recurring = recurring.sort_values(by="Yearly_Cost", ascending=False)
+    recurring = calculate_risk(recurring)
+    high_risk_count = len(recurring[recurring["Risk Level"] == "🔴 High"])
+    medium_risk_count = len(recurring[recurring["Risk Level"] == "🟡 Medium"])
+    low_risk_count = len(recurring[recurring["Risk Level"] == "🟢 Low"])
+
+    st.subheader("🤖 AI Risk Summary")
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("High Risk", high_risk_count)
+    col2.metric("Medium Risk", medium_risk_count)
+    col3.metric("Low Risk", low_risk_count)
+    high_risk_subscriptions = recurring[recurring["Risk Level"] == "🔴 High"]
+    potential_yearly_savings = high_risk_subscriptions["Yearly_Cost"].sum()
+    st.metric(
+        "Potential Yearly Savings",f"₹{potential_yearly_savings:.0f}"
+    )
+    
 
     st.subheader("📊 Dashboard")
 
@@ -68,6 +88,14 @@ if uploaded_file:
         title="Estimated Yearly Cost by Subscription"
     )
     st.plotly_chart(chart2, use_container_width=True)
+    st.subheader("🤖 AI Financial Advisor")
+
+    for _, row in recurring.iterrows():
+
+        with st.expander(f"{row['Description']} ({row['Risk Level']})"):
+
+           st.write(f"**Risk Score:** {row['Risk Score']}/100")
+           st.write(generate_insight(row))
 
 else:
     st.info("Upload a CSV file to start analysis.")
