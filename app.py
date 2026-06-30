@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 from utils.risk_engine import calculate_risk
 from utils.insights import generate_insight
-from models.util.ml_model import train_model, predict_cancellation
+from utils.ml_model import train_model, predict_cancellation
 st.set_page_config(
     page_title="Subscription Waste Detector AI",
     page_icon="💳",

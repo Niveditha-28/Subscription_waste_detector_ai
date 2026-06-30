@@ -3,7 +3,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 
 def train_model():
-    data = pd.read_csv("training_data.csv")
+    data = pd.read_csv("data/training_data.csv")
 
     X = data[["Monthly_Cost", "Occurrences", "Yearly_Cost", "Risk_Score"]]
     y = data["Cancelled"]
@@ -19,7 +19,16 @@ def train_model():
 
 
 def predict_cancellation(model, subscription_df):
-    X = subscription_df[["Monthly_Cost", "Occurrences", "Yearly_Cost", "Risk Score"]]
+    X = subscription_df[[
+        "Monthly_Cost",
+        "Occurrences",
+        "Yearly_Cost",
+        "Risk Score"
+    ]].copy()
+
+    X = X.rename(columns={
+        "Risk Score": "Risk_Score"
+    })
 
     predictions = model.predict(X)
     probabilities = model.predict_proba(X)[:, 1]
