@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 from utils.risk_engine import calculate_risk
 from utils.insights import generate_insight
-
+from models.util.ml_model import train_model, predict_cancellation
 st.set_page_config(
     page_title="Subscription Waste Detector AI",
     page_icon="💳",
@@ -36,6 +36,8 @@ if uploaded_file:
     recurring["Yearly_Cost"] = recurring["Monthly_Cost"] * 12
     recurring = recurring.sort_values(by="Yearly_Cost", ascending=False)
     recurring = calculate_risk(recurring)
+    model = train_model()
+    recurring = predict_cancellation(model, recurring)
     high_risk_count = len(recurring[recurring["Risk Level"] == "🔴 High"])
     medium_risk_count = len(recurring[recurring["Risk Level"] == "🟡 Medium"])
     low_risk_count = len(recurring[recurring["Risk Level"] == "🟢 Low"])
@@ -96,6 +98,11 @@ if uploaded_file:
 
            st.write(f"**Risk Score:** {row['Risk Score']}/100")
            st.write(generate_insight(row))
-
+    st.subheader("🧠 Machine Learning Predictions")
+    for _, row in recurring.iterrows():
+        st.write(
+            f"**{row['Description']}** → {row['ML Prediction']} "
+            f"({row['Cancel Probability']}% probability)"
+        )    
 else:
     st.info("Upload a CSV file to start analysis.")
