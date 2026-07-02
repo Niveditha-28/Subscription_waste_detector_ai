@@ -4,6 +4,7 @@ import plotly.express as px
 from utils.risk_engine import calculate_risk
 from utils.insights import generate_insight
 from utils.ml_model import train_model, predict_cancellation
+from utils.llm_advisor import generate_financial_advice
 st.set_page_config(
     page_title="Subscription Waste Detector AI",
     page_icon="💳",
@@ -103,6 +104,11 @@ if uploaded_file:
         st.write(
             f"**{row['Description']}** → {row['ML Prediction']} "
             f"({row['Cancel Probability']}% probability)"
-        )    
+        )  
+    st.subheader("🤖 AI Financial Advisor")
+
+    if st.button("Generate AI Financial Advice"):
+         advice = generate_financial_advice(recurring)
+         st.write(advice)      
 else:
     st.info("Upload a CSV file to start analysis.")
